@@ -9,13 +9,16 @@
 #include <fstream>
 #include <sstream>
 using namespace std;
-
-unordered_map<string, vector<pair<string, string>>> sensor_infos;
+struct Sensor {
+    string data;
+    string value;
+};
+unordered_map<string, vector<Sensor>> sensor_infos;
 void test_sensor() {
     for (auto& x : sensor_infos) {
         cout << x.first << endl;
         for (auto& y : x.second) {
-            cout << x.first << ' ' << y.first << ' ' << y.second << endl;
+            cout << x.first << ' ' << y.data << ' ' << y.value << endl;
         }
     }
 }
@@ -34,7 +37,10 @@ void read_train_data() {
         }
         istringstream record(line);
         record >> id >> data >> value;
-        sensor_infos[id].emplace_back(make_pair(data, value));
+        Sensor sensor;
+        sensor.data = data;
+        sensor.value = value;
+        sensor_infos[id].emplace_back(sensor);
     }
     // test_sensor();
 }
@@ -50,7 +56,7 @@ void revise_data(string& line) {
     istringstream record(temp_line);
     record >> id >> data;
     int len = sensor_infos[id].size();
-    string value = sensor_infos[id][len - 1].second;
+    string value = sensor_infos[id][len - 1].value;
     line += ',';
     line += value;
 }
@@ -68,8 +74,12 @@ void forcast() {
         out_result << line << endl;
     }
 }
+void dayth_ofTheYear() {
+
+}
 int main(int argc, char* argv[]) {
     read_train_data();
+    
     forcast();
     return 0;
 }
