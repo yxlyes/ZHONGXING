@@ -12,13 +12,14 @@ using namespace std;
 struct Sensor {
     string data;
     string value;
+    int dayNum;
 };
 unordered_map<string, vector<Sensor>> sensor_infos;
 void test_sensor() {
     for (auto& x : sensor_infos) {
         cout << x.first << endl;
         for (auto& y : x.second) {
-            cout << x.first << ' ' << y.data << ' ' << y.value << endl;
+            cout << x.first << ' ' << y.data << ' ' << y.value << ' ' << y.dayNum << endl;
         }
     }
 }
@@ -35,14 +36,37 @@ void read_train_data() {
         for (auto& c : line) {
             if (c == ',')   c = ' ';
         }
-        istringstream record(line);
-        record >> id >> data >> value;
+        istringstream record1(line);
+        record1 >> id >> data >> value;
         Sensor sensor;
         sensor.data = data;
         sensor.value = value;
+        for (auto& c : data) {
+            if (c == '-') c = ' ';
+        }
+        istringstream record2(data);
+        int year, month, day;
+        record2 >> year >> month >> day;
+        sensor.dayNum = (month - 1) * 30 + day;
         sensor_infos[id].emplace_back(sensor);
     }
     // test_sensor();
+}
+string find_best_value(int dayNum, string id) {
+    string best_value = "nan";
+    int best_gap = 999;
+    for (auto& sensor : sensor_infos[id]) {
+        int gap = abs(sensor.dayNum - dayNum);
+        if (gap <= best_gap && sensor.value != "nan") {
+            best_gap = gap;
+            best_value = sensor.value;
+        }
+    }
+    if (best_gap >= 30) {
+        return "nan";
+    } else {
+        return best_value;
+    }
 }
 void revise_name(string& line) {
     line += ",value";    
@@ -55,8 +79,14 @@ void revise_data(string& line) {
     }
     istringstream record(temp_line);
     record >> id >> data;
-    int len = sensor_infos[id].size();
-    string value = sensor_infos[id][len - 1].value;
+    for (auto& c : data) {
+        if (c == '-') c = ' ';
+    }
+    istringstream record3(data);
+    int year, month, day;
+    record3 >> year >> month >> day;
+    int dayNum = (month - 1) * 30 + day;
+    string value = find_best_value(dayNum, id);
     line += ',';
     line += value;
 }
@@ -74,12 +104,10 @@ void forcast() {
         out_result << line << endl;
     }
 }
-void dayth_ofTheYear() {
 
-}
 int main(int argc, char* argv[]) {
     read_train_data();
-    
+    cout << "read over" << endl;
     forcast();
     return 0;
 }
