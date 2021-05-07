@@ -22,7 +22,7 @@ void test_sensor() {
 void read_train_data() {
     string train_file_name = "train_step2.csv";
     string train_file_name2 = "test.csv";
-    ifstream in_train(train_file_name2);
+    ifstream in_train(train_file_name);
     string line;
     getline(in_train, line);
     // cout << line << endl;
@@ -36,19 +36,23 @@ void read_train_data() {
         record >> id >> data >> value;
         sensor_infos[id].emplace_back(make_pair(data, value));
     }
-    test_sensor();
+    // test_sensor();
 }
 void revise_name(string& line) {
     line += ",value";    
 }
 void revise_data(string& line) {
     string temp_line = line;
-    string id, data, value;
+    string id, data;
     for (auto& c : temp_line) {
         if (c == ',')   c = ' ';
     }
-    istringstream record(line);
+    istringstream record(temp_line);
     record >> id >> data;
+    int len = sensor_infos[id].size();
+    string value = sensor_infos[id][len - 1].second;
+    line += ',';
+    line += value;
 }
 void forcast() {
     string forcast_file_name = "test_step2.csv";
